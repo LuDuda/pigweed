@@ -200,7 +200,14 @@ template("generate_toolchain") {
 
       assert(defined(invoker.ar), "toolchain is missing 'ar'")
       tool("alink") {
-        command = "rm -f {{output}} && ${invoker.ar} rcs {{output}} {{inputs}}"
+        if (host_os == "win") {
+            rspfile = "{{output}}.rsp"
+            rspfile_content = "{{inputs}}"
+            command = "cmd /c \"rm -f {{output}} && ${invoker.ar} rcs {{output}} @$rspfile\""
+        } else {
+            command = "rm -f {{output}} && ${invoker.ar} rcs {{output}} {{inputs}}"
+        }
+
         description = "ar {{target_output_name}}{{output_extension}}"
         outputs =
             [ "{{output_dir}}/{{target_output_name}}{{output_extension}}" ]
